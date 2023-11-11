@@ -131,9 +131,9 @@ That 3rd party URL belongs to the __*nginx-ip-whitelister*__ – which needs to 
 
 Whenever __*nginx-ip-whitelister*__ sees a valid access key in a request URL it adds the visitor's IP address to a whitelist. Once that happens, all requests from the IP (which usually means everybody and everything in their LAN) will be allowed through.
 
-You can optionally configure more conditions for the visitors such as IP netmasks, GeoIP, TOTP codes etc. 
+You can optionally configure more conditions for the visitors such as IP netmasks, GeoIP, TOTP codes etc.
 
-## 5. How to run the whitelister 
+## 5. How to run the whitelister
 
 ### 5.1. Running as a standalone app
 
@@ -162,21 +162,21 @@ If you intend to run both Nginx Proxy Manager and **_nginx-ip-whitelister_** as 
 
 The file `docker-compose-proxy-manager.yaml` contains an example configuration that will deploy both NPM and this app in separate containers, but allow them to communicate through a Docker network.
 
-You will need to create the Docker network:  
+You will need to create the Docker network:
 `docker network create nginx-network`
 
 Then run `docker-compose up -d` from the same directory where you've downloaded the `.yaml` file.
 
 #### 5.2.3. Pull the pre-built Docker image
 
-You can find pre-built Docker images for this project on the GitHub Container Repository:  
+You can find pre-built Docker images for this project on the GitHub Container Repository:
 https://github.com/users/zuavra/packages/container/package/nginx-ip-whitelister
 
 The example `.yaml` files provided with the source code already refer to the pre-built image, for your convenience.
 
 However, you can also pull the ready-made image manually, to use in Docker configurations you've written yourself, or as a layer for other Docker images, or simply when you wish to update to the latest version of the app.
 
-To do that, run:  
+To do that, run:
 `docker pull ghcr.io/zuavra/nginx-ip-whitelister:latest`
 
 > After pulling the latest image please remember that you also have to stop, remove, and then remake any Docker containers based on it.

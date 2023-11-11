@@ -10,8 +10,11 @@ export default
     res.local.accessKeys = getHeaders('x-nipw-key');
     res.local.keyIsolation = (String(getHeaders('x-nipw-key-isolation')[0]).toLowerCase() !== 'disabled');
     res.local.totpSecrets = getHeaders('x-nipw-totp');
+    res.local.useGeoIpCountryIsApi = (String(getHeaders('x-nipw-geoip-country-is-api')[0]).toLowerCase() === 'true');
     res.local.goodCountries = getHeaders('x-nipw-geoip-allow');
+    res.local.goodCountries = res.local.goodCountries.map(c => c.toUpperCase());
     res.local.badCountries = getHeaders('x-nipw-geoip-deny');
+    res.local.badCountries = res.local.badCountries.map(c => c.toUpperCase());
     res.local.goodNetmasks = getHeaders('x-nipw-netmask-allow');
     res.local.badNetmasks = getHeaders('x-nipw-netmask-deny');
     res.local.fixedTimeout = parseInterval(getHeaders('x-nipw-fixed-timeout')[0] || '');

@@ -17,6 +17,7 @@ dotenv.config();
 const server = factories.httpFactory();
 const app = factories.appFactory(server, factories.urlFactory);
 const whitelistStore = factories.mapFactory();
+const ipApiCacheStore = factories.mapFactory();
 const globalLogger = factories.loggerFactory('yes', factories.dateFactory, timeLib.logTimestamp);
 
 import mVerify_selectWhitelist from './middleware/verify_select_whitelist.js';
@@ -34,7 +35,7 @@ globalLogger.flush('Loaded all middleware.');
 
 const buffer = fs.readFileSync('./dbip-country-lite.mmdb');
 const geoIP = factories.mmdbReaderFactory(buffer);
-globalLogger.flush('Loaded GeoIP database.');
+globalLogger.flush('Loaded GeoIP Lite database.');
 
 const htmlResources = {
     css: fs.readFileSync('./resources/style.css'),
@@ -63,12 +64,13 @@ app.use('/reject', (_, res) => {
 
 app.use(null, (_, res) => {
     res.local.whitelistStore = whitelistStore;
+    res.local.ipApiCacheStore = ipApiCacheStore;
 });
 app.use('/verify',
     mVerify_selectWhitelist(whitelistStore, factories.mapFactory),
     mVerify_getProxyConfig(factories.urlFactory, timeLib.parseInterval),
     mVerify_netmasks(factories.netmaskFactory),
-    mVerify_geoip(geoIP, isPrivateIP),
+    await mVerify_geoip(geoIP, isPrivateIP),
     mVerify_logout,
     mVerify_checkWhitelist(factories.dateFactory),
     mVerify_key,

@@ -1,6 +1,6 @@
 export default
 (geoIP, isPrivateIP) =>
-(_, res) => {
+    async (_, res) => {
     const allow = res.local.goodCountries;
     const deny = res.local.badCountries;
 
@@ -10,8 +10,17 @@ export default
             return;
         }
 
-        const geoLocation = geoIP.get(res.local.remoteIP);
-        const countryCode = geoLocation?.country?.iso_code;
+        let countryCode = null;
+
+        if (res.local.useGeoIpCountryIsApi) {
+            res.local.logger.queue(`Using Country Is API`);
+            countryCode = await getCountryCodeFromCountryIsApi(res);
+        }
+
+        if (countryCode === null) {
+            const geoLocation = geoIP.get(res.local.remoteIP);
+            countryCode = geoLocation?.country?.iso_code;
+        }
 
         if (countryCode) {
             res.local.logger.addPrefix(countryCode);
@@ -37,3 +46,24 @@ export default
         }
     }
 };
+
+async function getCountryCodeFromCountryIsApi(res) {
+    if (res.local.ipApiCacheStore.has(res.local.remoteIP)) {
+        res.local.logger.flush(`re using cached API`);
+        return res.local.ipApiCacheStore.get(res.local.remoteIP);
+    }
+    else {
+        const response = await fetch(`https://api.country.is/${res.local.remoteIP}`);
+        if (!response.ok) {
+            res.local.logger.flush(`country.is IP API lookup failed for ${res.local.remoteIP}`);
+            return null;
+          }
+        const apiData = await response.json();
+        const countryCode = apiData?.country?.toUpperCase();
+        if (countryCode) {
+            res.local.logger.flush(`Setting ${countryCode} to store`);
+            res.local.ipApiCacheStore.set(res.local.remoteIP, countryCode);
+        }
+        return countryCode;
+    }
+}
